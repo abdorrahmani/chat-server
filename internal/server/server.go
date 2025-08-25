@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -62,7 +63,25 @@ func (s *ChatServer) Broadcast(sender *Client, message string) {
 	}
 }
 
-// HandleConnection handles a new client connection
+func (s *ChatServer) PrivateMessage(sender *Client, recipient, message string) error {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	if !sender.connected {
+		return errors.New("client is not connected")
+	}
+
+	if client, exists := s.clients[recipient]; !exists {
+		return errors.New("recipient not found")
+	} else if !client.connected {
+		return errors.New("client is not connected")
+	} else {
+		client.Send(fmt.Sprintf("[Private] %s : %s", sender.Username, message))
+		return nil
+	}
+}
+
+// HandleConnection handles a new client connection to the chat server
 func HandleConnection(conn net.Conn, server *ChatServer) {
 	defer conn.Close()
 
@@ -97,7 +116,19 @@ func HandleConnection(conn net.Conn, server *ChatServer) {
 
 	for scanner.Scan() {
 		message := scanner.Text()
-		server.Broadcast(client, message)
+		if strings.HasPrefix(message, "/pm") {
+			parts := strings.SplitN(message, " ", 3)
+			if len(parts) < 3 {
+				client.Send("ERROR: Invalid private message format. Use /pm <username> <message>\n")
+				continue
+			}
+			recipient, msg := parts[1], parts[2]
+			err = server.PrivateMessage(client, recipient, msg)
+			if err != nil {
+				client.Send("ERROR: Invalid private message " + err.Error())
+			}
+		} else {
+			server.Broadcast(client, message)
+		}
 	}
-
 }
