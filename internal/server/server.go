@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"net"
-	"strings"
 	"sync"
 )
 
@@ -100,11 +99,14 @@ func HandleConnection(conn net.Conn, server *ChatServer) {
 		return
 	}
 
-	writer.WriteString(fmt.Sprintf("%s Welcome to the Anophel Chat service\n", username))
+	writer.WriteString(fmt.Sprintf("%s Welcome to the Anophel Chat service. (anophel\n", username))
 	writer.Flush()
 
 	server.Broadcast(client, fmt.Sprintf("%s has joined the chat\n", username))
-	defer server.Disconnect(client)
+	defer func() {
+		server.Broadcast(client, fmt.Sprintf("%s has left the chat\n", username))
+		server.Disconnect(client)
+	}()
 
 	go func() {
 		for msg := range client.Message {
@@ -113,21 +115,5 @@ func HandleConnection(conn net.Conn, server *ChatServer) {
 		}
 	}()
 
-	for scanner.Scan() {
-		message := scanner.Text()
-		if strings.HasPrefix(message, "/pm") {
-			parts := strings.SplitN(message, " ", 3)
-			if len(parts) < 3 {
-				client.Send("ERROR: Invalid private message format. Use /pm <username> <message>\n")
-				continue
-			}
-			recipient, msg := parts[1], parts[2]
-			err = server.PrivateMessage(client, recipient, msg)
-			if err != nil {
-				client.Send("ERROR: Invalid private message " + err.Error())
-			}
-		} else {
-			server.Broadcast(client, message)
-		}
-	}
+	HandleInputs(scanner, client, server)
 }
