@@ -2,7 +2,6 @@ package server
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -28,7 +27,7 @@ func (s *ChatServer) Connect(username string) (*Client, error) {
 	defer s.mutex.Unlock()
 
 	if _, exists := s.clients[username]; exists {
-		return nil, errors.New("Username already exists")
+		return nil, ErrUsernameAlreadyTaken
 	}
 
 	client := &Client{
@@ -68,13 +67,13 @@ func (s *ChatServer) PrivateMessage(sender *Client, recipient, message string) e
 	defer s.mutex.RUnlock()
 
 	if !sender.connected {
-		return errors.New("client is not connected")
+		return ErrClientDisconnected
 	}
 
 	if client, exists := s.clients[recipient]; !exists {
-		return errors.New("recipient not found")
+		return ErrRecipientNotFound
 	} else if !client.connected {
-		return errors.New("client is not connected")
+		return ErrClientDisconnected
 	} else {
 		client.Send(fmt.Sprintf("[Private] %s : %s", sender.Username, message))
 		return nil
