@@ -1,0 +1,11 @@
+# Anophel Chat service configuration file
+
+port: "8080"
+requirePassword: false
+password: "1234"
+maxMessageLength: 1000
+maxClients: 100
+rateLimit: 5 # messages per second
+enableLogging: false
+logFile: "chat.log"
+
