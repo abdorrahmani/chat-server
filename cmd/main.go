@@ -34,6 +34,6 @@ func main() {
 			continue
 		}
 
-		go server.HandleConnection(conn, s)
+		go server.HandleConnection(conn, s, cfg)
 	}
 }

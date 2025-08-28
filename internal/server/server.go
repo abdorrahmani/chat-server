@@ -2,6 +2,7 @@ package server
 
 import (
 	"bufio"
+	"chat-server/internal/config"
 	"fmt"
 	"net"
 	"sync"
@@ -80,7 +81,7 @@ func (s *ChatServer) PrivateMessage(sender *Client, recipient, message string) e
 }
 
 // HandleConnection handles a new client connection to the chat server
-func HandleConnection(conn net.Conn, server *ChatServer) {
+func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 	defer conn.Close()
 
 	scanner := bufio.NewScanner(conn)
@@ -115,5 +116,5 @@ func HandleConnection(conn net.Conn, server *ChatServer) {
 		}
 	}()
 
-	HandleInputs(scanner, client, server)
+	HandleInputs(scanner, client, server, cfg)
 }
