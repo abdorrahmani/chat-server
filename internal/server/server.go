@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"time"
 )
 
 // ChatServer manages client connections and message routing
@@ -22,7 +23,7 @@ func NewChatServer() *ChatServer {
 }
 
 // Connect Add a new client to the chat server
-func (s *ChatServer) Connect(username string, maxClients int) (*Client, error) {
+func (s *ChatServer) Connect(username string, maxClients, rateLimit int) (*Client, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
@@ -34,10 +35,12 @@ func (s *ChatServer) Connect(username string, maxClients int) (*Client, error) {
 		return nil, ErrServerFull
 	}
 
+	refillRate := time.Second / time.Duration(rateLimit)
 	client := &Client{
 		Username:  username,
 		Message:   make(chan string, 10),
 		connected: true,
+		limiter:   NewTokenBucket(rateLimit, refillRate),
 	}
 
 	s.clients[username] = client
@@ -97,7 +100,7 @@ func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 	scanner.Scan()
 	username := scanner.Text()
 
-	client, err := server.Connect(username, cfg.MaxClients)
+	client, err := server.Connect(username, cfg.MaxClients, cfg.RateLimit)
 	if err != nil {
 		writer.WriteString(fmt.Sprintln(err))
 		writer.Flush()

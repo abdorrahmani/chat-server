@@ -18,6 +18,12 @@ func HandleInputs(scanner *bufio.Scanner, client *Client, server *ChatServer, cf
 			client.Send("❌ message too long (max: " + strconv.Itoa(cfg.MaxMessageLength) + " chars)")
 			continue
 		}
+
+		if !client.limiter.Allow() {
+			client.Send("You are sending message too fast! slow down.")
+			continue
+		}
+
 		if strings.TrimSpace(message) == "/quit" {
 			client.Send("You have left the chat.")
 			return

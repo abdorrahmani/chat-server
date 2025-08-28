@@ -8,6 +8,7 @@ type Client struct {
 	Message   chan string
 	connected bool
 	mutex     sync.RWMutex
+	limiter   *TokenBucket
 }
 
 // Send sends a message to the client
