@@ -22,12 +22,16 @@ func NewChatServer() *ChatServer {
 }
 
 // Connect Add a new client to the chat server
-func (s *ChatServer) Connect(username string) (*Client, error) {
+func (s *ChatServer) Connect(username string, maxClients int) (*Client, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	if _, exists := s.clients[username]; exists {
 		return nil, ErrUsernameAlreadyTaken
+	}
+
+	if len(s.clients) >= maxClients {
+		return nil, ErrServerFull
 	}
 
 	client := &Client{
@@ -93,7 +97,7 @@ func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 	scanner.Scan()
 	username := scanner.Text()
 
-	client, err := server.Connect(username)
+	client, err := server.Connect(username, cfg.MaxClients)
 	if err != nil {
 		writer.WriteString(fmt.Sprintln(err))
 		writer.Flush()
