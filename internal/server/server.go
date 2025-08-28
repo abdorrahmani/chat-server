@@ -100,6 +100,20 @@ func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 	scanner.Scan()
 	username := scanner.Text()
 
+	if cfg.RequirePassword {
+		writer.WriteString("Enter password: ")
+		writer.Flush()
+
+		password := cfg.Password
+		scanner.Scan()
+		enteredPassword := scanner.Text()
+		if password != enteredPassword {
+			writer.WriteString("Passwords do not match")
+			writer.Flush()
+			return
+		}
+	}
+
 	client, err := server.Connect(username, cfg.MaxClients, cfg.RateLimit)
 	if err != nil {
 		writer.WriteString(fmt.Sprintln(err))
