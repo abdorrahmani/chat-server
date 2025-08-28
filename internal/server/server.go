@@ -100,18 +100,9 @@ func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 	scanner.Scan()
 	username := scanner.Text()
 
-	if cfg.RequirePassword {
-		writer.WriteString("Enter password: ")
-		writer.Flush()
-
-		password := cfg.Password
-		scanner.Scan()
-		enteredPassword := scanner.Text()
-		if password != enteredPassword {
-			writer.WriteString("Passwords do not match")
-			writer.Flush()
-			return
-		}
+	correctPass := passwordChecker(cfg.RequirePassword, cfg.Password, scanner, writer)
+	if !correctPass {
+		return
 	}
 
 	client, err := server.Connect(username, cfg.MaxClients, cfg.RateLimit)
@@ -138,4 +129,23 @@ func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 	}()
 
 	HandleInputs(scanner, client, server, cfg)
+}
+
+// passwordChecker check password is required if required match password and return result
+func passwordChecker(requirePassword bool, cfgPassword string, scanner *bufio.Scanner, writer *bufio.Writer) bool {
+	if requirePassword {
+		writer.WriteString("Enter password: ")
+		writer.Flush()
+
+		password := cfgPassword
+		scanner.Scan()
+		enteredPassword := scanner.Text()
+		if password != enteredPassword {
+			writer.WriteString("Passwords do not match")
+			writer.Flush()
+			return false
+		}
+		return true
+	}
+	return true
 }
