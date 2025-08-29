@@ -15,9 +15,9 @@ func HandleInputs(conn Connection, client *Client, server *ChatServer, cfg *conf
 			break
 		}
 
-		if len(message) > cfg.MaxMessageLength {
-			fmt.Printf("❌message too long (max %d chars)\n", cfg.MaxMessageLength)
-			client.Send("❌ message too long (max: " + strconv.Itoa(cfg.MaxMessageLength) + " chars)")
+		if len(message) > cfg.Message.MaxLength {
+			fmt.Printf("❌message too long (max %d chars)\n", cfg.Message.MaxLength)
+			client.Send("❌ message too long (max: " + strconv.Itoa(cfg.Message.MaxLength) + " chars)")
 			continue
 		}
 

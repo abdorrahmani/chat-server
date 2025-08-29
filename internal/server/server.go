@@ -95,12 +95,12 @@ func HandleConnection(conn Connection, server *ChatServer, cfg *config.Config) {
 		return
 	}
 
-	correctPass := passwordChecker(cfg.RequirePassword, cfg.Password, conn)
+	correctPass := passwordChecker(cfg.Security.RequirePassword, cfg.Security.Password, conn)
 	if !correctPass {
 		return
 	}
 
-	client, err := server.Connect(username, cfg.MaxClients, cfg.RateLimit)
+	client, err := server.Connect(username, cfg.Server.MaxClients, cfg.RateLimit.MessagePerSecond)
 	if err != nil {
 		conn.WriteLine(err.Error())
 		return

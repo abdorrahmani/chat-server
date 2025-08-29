@@ -7,15 +7,39 @@ import (
 )
 
 type Config struct {
-	PORT             string `yaml:"PORT"`
-	Type             string `yaml:"type"`
-	RequirePassword  bool   `yaml:"RequirePassword"`
-	Password         string `yaml:"Password"`
-	MaxMessageLength int    `yaml:"MaxMessageLength"`
-	MaxClients       int    `yaml:"MaxClients"`
-	RateLimit        int    `yaml:"RateLimit"`
-	EnableLogging    bool   `yaml:"EnableLogging"`
-	LogFile          string `yaml:"LogFile"`
+	Server    ServerConfig
+	Security  SecurityConfig
+	Message   MessageConfig
+	RateLimit RateLimitConfig
+	Log       LogConfig
+}
+
+type ServerConfig struct {
+	Host         string `yaml:"host"`
+	Port         int    `yaml:"port"`
+	Type         string `yaml:"type"`
+	MaxClients   int    `yaml:"maxClients"`
+	ReadTimeout  int    `yaml:"readTimeout"`
+	WriteTimeout int    `yaml:"writeTimeout"`
+}
+
+type SecurityConfig struct {
+	RequirePassword bool   `yaml:"requirePassword"`
+	Password        string `yaml:"password"`
+}
+
+type MessageConfig struct {
+	MaxLength int `yaml:"maxLength"`
+}
+
+type RateLimitConfig struct {
+	MessagePerSecond int `yaml:"messagePerSecond"`
+	Burst            int `yaml:"burst"`
+}
+
+type LogConfig struct {
+	EnableLogging bool   `yaml:"enableLogging"`
+	File          string `yaml:"file"`
 }
 
 func LoadConfig() (*Config, error) {
@@ -32,5 +56,6 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fatal error config file: %w", err)
 	}
+
 	return &config, nil
 }

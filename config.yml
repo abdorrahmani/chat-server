@@ -1,12 +1,23 @@
 # Anophel Chat service configuration file
+server:
+  host: "0.0.0.0"
+  port: 8080
+  type: "tcp"
+  maxClients: 100
+  readTimeout : 5 # per second
+  writeTimeout: 5 # per second
 
-type: "websocket" # tcp or websocket
-port: "8080"
-requirePassword: false
-password: "1234"
-maxMessageLength: 1000
-maxClients: 100
-rateLimit: 5 # messages per second
-enableLogging: false
-logFile: "chat.log"
+security:
+  requirePassword: false
+  password: "1234"
 
+rateLimit:
+  messagePerSecond: 5
+  burst: 5
+
+message:
+  maxLength : 1000
+
+logs:
+  enableLogging: false
+  file: "chat.log"
