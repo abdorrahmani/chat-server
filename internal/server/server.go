@@ -1,10 +1,8 @@
 package server
 
 import (
-	"bufio"
 	"chat-server/internal/config"
 	"fmt"
-	"net"
 	"sync"
 	"time"
 )
@@ -88,34 +86,29 @@ func (s *ChatServer) PrivateMessage(sender *Client, recipient, message string) e
 }
 
 // HandleConnection handles a new client connection to the chat server
-func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
+func HandleConnection(conn Connection, server *ChatServer, cfg *config.Config) {
 	defer conn.Close()
 
-	scanner := bufio.NewScanner(conn)
-	writer := bufio.NewWriter(conn)
+	conn.WriteLine("Enter your username: ")
+	username, err := conn.ReadLine()
+	if err != nil {
+		return
+	}
 
-	writer.WriteString("Enter your username: ")
-	writer.Flush()
-
-	scanner.Scan()
-	username := scanner.Text()
-
-	correctPass := passwordChecker(cfg.RequirePassword, cfg.Password, scanner, writer)
+	correctPass := passwordChecker(cfg.RequirePassword, cfg.Password, conn)
 	if !correctPass {
 		return
 	}
 
 	client, err := server.Connect(username, cfg.MaxClients, cfg.RateLimit)
 	if err != nil {
-		writer.WriteString(fmt.Sprintln(err))
-		writer.Flush()
+		conn.WriteLine(err.Error())
 		return
 	}
 
-	writer.WriteString(fmt.Sprintf("%s Welcome to the Anophel Chat service. (anophel\n", username))
-	writer.Flush()
+	conn.WriteLine(username + ", Welcome to the Anophel Chat service")
 
-	server.Broadcast(client, fmt.Sprintf("%s has joined the chat\n", username))
+	server.Broadcast(client, "has joined the chat")
 	defer func() {
 		server.Broadcast(client, fmt.Sprintf("%s has left the chat\n", username))
 		server.Disconnect(client)
@@ -123,26 +116,25 @@ func HandleConnection(conn net.Conn, server *ChatServer, cfg *config.Config) {
 
 	go func() {
 		for msg := range client.Message {
-			writer.WriteString(msg + "\n")
-			writer.Flush()
+			conn.WriteLine(msg)
 		}
 	}()
 
-	HandleInputs(scanner, client, server, cfg)
+	HandleInputs(conn, client, server, cfg)
 }
 
 // passwordChecker check password is required if required match password and return result
-func passwordChecker(requirePassword bool, cfgPassword string, scanner *bufio.Scanner, writer *bufio.Writer) bool {
+func passwordChecker(requirePassword bool, cfgPassword string, conn Connection) bool {
 	if requirePassword {
-		writer.WriteString("Enter password: ")
-		writer.Flush()
+		conn.WriteLine("Enter password: ")
 
 		password := cfgPassword
-		scanner.Scan()
-		enteredPassword := scanner.Text()
+		enteredPassword, err := conn.ReadLine()
+		if err != nil {
+			return false
+		}
 		if password != enteredPassword {
-			writer.WriteString("Passwords do not match")
-			writer.Flush()
+			conn.WriteLine("Passwords do not match")
 			return false
 		}
 		return true

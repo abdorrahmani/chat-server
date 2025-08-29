@@ -1,5 +1,6 @@
 # Anophel Chat service configuration file
 
+type: "websocket" # tcp or websocket
 port: "8080"
 requirePassword: false
 password: "1234"

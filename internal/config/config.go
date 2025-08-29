@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	PORT             string `yaml:"PORT"`
+	Type             string `yaml:"type"`
 	RequirePassword  bool   `yaml:"RequirePassword"`
 	Password         string `yaml:"Password"`
 	MaxMessageLength int    `yaml:"MaxMessageLength"`

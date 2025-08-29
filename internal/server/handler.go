@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bufio"
 	"chat-server/internal/config"
 	"fmt"
 	"strconv"
@@ -9,9 +8,12 @@ import (
 )
 
 // HandleInputs handles incoming messages from a client
-func HandleInputs(scanner *bufio.Scanner, client *Client, server *ChatServer, cfg *config.Config) {
-	for scanner.Scan() {
-		message := scanner.Text()
+func HandleInputs(conn Connection, client *Client, server *ChatServer, cfg *config.Config) {
+	for {
+		message, err := conn.ReadLine()
+		if err != nil {
+			break
+		}
 
 		if len(message) > cfg.MaxMessageLength {
 			fmt.Printf("❌message too long (max %d chars)\n", cfg.MaxMessageLength)
