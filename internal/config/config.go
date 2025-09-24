@@ -26,6 +26,9 @@ type ServerConfig struct {
 type SecurityConfig struct {
 	RequirePassword bool   `yaml:"requirePassword"`
 	Password        string `yaml:"password"`
+	HashMessage     bool   `yaml:"hashMessage"`
+	HashAlgorithm   string `yaml:"hashAlgorithm"`
+	HashKey         string `yaml:"hashKey"`
 }
 
 type MessageConfig struct {

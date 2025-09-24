@@ -10,6 +10,9 @@ server:
 security:
   requirePassword: false
   password: "1234"
+  hashMessage: true
+  hashAlgorithm: "hmac-sha256"
+  hashKey: "supersecret"
 
 rateLimit:
   messagePerSecond: 5
