@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Server    ServerConfig
 	Security  SecurityConfig
+	TLS       TLSConfig
 	Message   MessageConfig
 	RateLimit RateLimitConfig
 	Log       LogConfig
@@ -43,6 +44,13 @@ type RateLimitConfig struct {
 type LogConfig struct {
 	EnableLogging bool   `yaml:"enableLogging"`
 	File          string `yaml:"file"`
+}
+
+type TLSConfig struct {
+	TLSRequire bool   `yaml:"tlsRequire"`
+	CertFile   string `yaml:"certFile"`
+	KeyFile    string `yaml:"keyFile"`
+	MinVersion string `yaml:"minVersion"`
 }
 
 func LoadConfig() (*Config, error) {

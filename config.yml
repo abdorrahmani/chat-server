@@ -21,6 +21,12 @@ rateLimit:
 message:
   maxLength : 1000
 
-logs:
+log:
   enableLogging: false
   file: "chat.log"
+
+tls:
+  tlsRequire: false # Enable TLS
+  certFile: "tls/server.crt" # Certificate file
+  keyFile: "tls/server.key" # Private key file
+  minVersion: "TLS12" # Minimum TLS version
