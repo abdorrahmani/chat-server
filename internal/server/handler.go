@@ -2,13 +2,14 @@ package server
 
 import (
 	"chat-server/internal/config"
+	"chat-server/internal/server/network"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
 // HandleInputs handles incoming messages from a client
-func HandleInputs(conn Connection, client *Client, server *ChatServer, cfg *config.Config) {
+func HandleInputs(conn network.Connection, client *Client, server *ChatServer, cfg *config.Config) {
 	for {
 		message, err := conn.ReadLine()
 		if err != nil {

@@ -2,6 +2,7 @@ package server
 
 import (
 	"chat-server/internal/config"
+	"chat-server/internal/server/network"
 	"fmt"
 	"sync"
 	"time"
@@ -86,7 +87,7 @@ func (s *ChatServer) PrivateMessage(sender *Client, recipient, message string) e
 }
 
 // HandleConnection handles a new client connection to the chat server
-func HandleConnection(conn Connection, server *ChatServer, cfg *config.Config) {
+func HandleConnection(conn network.Connection, server *ChatServer, cfg *config.Config) {
 	defer conn.Close()
 
 	conn.WriteLine("Enter your username: ")
@@ -124,7 +125,7 @@ func HandleConnection(conn Connection, server *ChatServer, cfg *config.Config) {
 }
 
 // passwordChecker check password is required if required match password and return result
-func passwordChecker(requirePassword bool, cfgPassword string, conn Connection) bool {
+func passwordChecker(requirePassword bool, cfgPassword string, conn network.Connection) bool {
 	if requirePassword {
 		conn.WriteLine("Enter password: ")
 

@@ -3,6 +3,7 @@ package main
 import (
 	"chat-server/internal/config"
 	"chat-server/internal/server"
+	"chat-server/internal/server/network"
 	"fmt"
 	"log"
 	"net"
@@ -35,7 +36,7 @@ func main() {
 				log.Printf("Error accepting connection: %v\n", err)
 				continue
 			}
-			go server.HandleConnection(server.NewTCPConnection(conn), chatServer, cfg)
+			go server.HandleConnection(network.NewTCPConnection(conn), chatServer, cfg)
 		}
 	} else if cfg.Server.Type == "websocket" {
 		upgrader := websocket.Upgrader{}
@@ -45,7 +46,7 @@ func main() {
 				log.Printf("Error upgrading websocket: %s\n", err)
 				return
 			}
-			go server.HandleConnection(server.NewWSConnection(wsConn), chatServer, cfg)
+			go server.HandleConnection(network.NewWSConnection(wsConn), chatServer, cfg)
 		})
 
 		log.Printf("Websocket chat server listening on port %d\n", cfg.Server.Port)
