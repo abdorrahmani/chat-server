@@ -1,25 +1,28 @@
- ## Anophel Chat Server (Go)
+## Anophel Chat Server (Go)
 
- [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
- [![Go](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white)](https://github.com/abdorrahmani/chat-server)
- [![GitHub stars](https://img.shields.io/github/stars/abdorrahmani/chat-server?logo=github)](https://github.com/abdorrahmani/chat-server/stargazers)
- [![GitHub issues](https://img.shields.io/github/issues/abdorrahmani/chat-server?logo=github)](https://github.com/abdorrahmani/chat-server/issues)
- [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://github.com/abdorrahmani/chat-server)
- [![Release](https://img.shields.io/github/v/release/abdorrahmani/chat-server?include_prereleases&sort=semver)](https://github.com/abdorrahmani/chat-server/releases)
+[![Go](https://img.shields.io/badge/Go-1.24-00ADD8?logo=go&logoColor=white)](https://github.com/abdorrahmani/chat-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/abdorrahmani/chat-server?include_prereleases&sort=semver)](https://github.com/abdorrahmani/chat-server/releases)
+[![GitHub stars](https://img.shields.io/github/stars/abdorrahmani/chat-server?logo=github)](https://github.com/abdorrahmani/chat-server/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/abdorrahmani/chat-server?logo=github)](https://github.com/abdorrahmani/chat-server/issues)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://github.com/abdorrahmani/chat-server)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?logo=github)](https://github.com/abdorrahmani/chat-server/pulls)
+[![Made with Love](https://img.shields.io/badge/made%20with-%F0%9F%92%9A-white)](https://github.com/abdorrahmani/chat-server)
+![Website](https://img.shields.io/website?url=https%3A%2F%2Fanophel.com&up_message=Anophel&up_color=blue&logo=https%3A%2F%2Fanophel.com%2Ffavicon.ico)
 
 Lightweight chat server supporting TCP, gRPC and WebSocket transports, with optional TLS for both (TLS over TCP, gRPC and WSS). Includes configurable rate limiting, message size limits, optional password gate, and Docker/Compose deployment.
 
-### Features
-- TCP, gRPC and WebSocket transports
-- Optional TLS for both transports (TLS1.2+)
-- Simple chat with broadcast and private messages
-- Rate limiting per client and message length limit
-- Optional password prompt before joining
-- Dockerfile and docker-compose included
+### ✨Features 
+- **Multi-transport**: TCP, gRPC, WebSocket
+- **Secure by choice**: TLS 1.2+ for TCP, gRPC and WSS
+- **Chat essentials**: broadcast + private messages
+- **Fair usage**: per-client rate limit and max message length
+- **Access control**: optional password gate
+- **Container-ready**: Dockerfile + Compose
 
 ---
 
-## Table of Contents
+## 📚Table of Contents 
 - Setup
 - Configuration
 - Generate TLS certificates
@@ -33,7 +36,7 @@ Lightweight chat server supporting TCP, gRPC and WebSocket transports, with opti
 
 ---
 
-## Setup
+## 🧰Setup 
 
 Prerequisites:
 - Go 1.24+
@@ -58,7 +61,7 @@ The server reads `config.yml` from the current working directory.
 
 ---
 
-## Configuration
+## ⚙️Configuration 
 
 All settings live in `config.yml` and are loaded via Viper at startup.
 
@@ -97,13 +100,13 @@ tls:
 ```
 
 keynotes:
-- Set `server.type` to `tcp` for raw TCP, or `websocket` for WS/WSS, or `gRPC` for RPC .
+- Set `server.type` to `tcp` for raw TCP, or `websocket` for WS/WSS, or `gRPC` for RPC.
 - Set `tls.tlsRequire: true` to enable TLS (affects both TCP, gRPC and WebSocket depending on `server.type`).
 - Files referenced in `tls` must exist and be readable by the process.
 
 ---
 
-## Generate TLS certificates
+## 🔏Generate TLS certificates 
 
 Self-signed certificates for local development are supported. Scripts are provided:
 
@@ -132,7 +135,7 @@ tls:
 
 ---
 
-## Run
+## ▶️Run 
 
 ### TCP mode (plaintext)
 ```bash
@@ -182,7 +185,7 @@ Uses your `tls/server.crt` and `tls/server.key`.
 
 ---
 
-## Use the server
+## 🧑‍💻Use the server 
 
 When a client connects, the server prompts:
 1) `Enter your username:`
@@ -241,7 +244,7 @@ Commands and behavior:
 
 ---
 
-## TLS usage details
+## 🔐TLS usage details 
 
 The server enables TLS when `tls.tlsRequire: true`.
 
@@ -269,7 +272,7 @@ Security considerations:
 
 ---
 
-## Docker
+## 🐳Docker 
 
 ### Build and run (Dockerfile)
 ```bash
@@ -294,7 +297,7 @@ Edit `config.yml` to switch between `tcp`/`websocket` and to enable/disable TLS.
 
 ---
 
-## gRPC mode
+## 📡gRPC mode 
 
 Set in `config.yml`:
 ```yaml
@@ -328,7 +331,7 @@ Notes:
 
 ---
 
-## Logs and files
+## 🗂️Logs and files
 - TLS assets: `tls/server.crt`, `tls/server.key`
 - Configuration: `config.yml`
 - Binary (local build): `bin/chat`
@@ -336,7 +339,7 @@ Notes:
 
 ---
 
-## Troubleshooting
+## 🛠️Troubleshooting 
 - Port already in use: change `server.port` or stop the conflicting service.
 - Self-signed cert errors: for testing clients, disable verification (`--no-check` in wscat, `-verify 0` in `openssl s_client`) or trust the cert.
 - Cannot connect over WSS: confirm `tls.tlsRequire: true`, cert/key paths exist in the container/host process, and the port is reachable.
@@ -345,9 +348,17 @@ Notes:
 
 ---
 
-## License
+## 🤑 One more thing
+If you want!
+
+[![Buy me a latte][🖇buyme-img]][🖇buyme]
+
+[🖇buyme-img]: https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=abdorrahmani&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff
+[🖇buyme]: https://www.buymeacoffee.com/abdorrahmani
+
+## 📄License 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## 🙌Contact 
 
 - GitHub: [@abdorrahmani](https://github.com/abdorrahmani)
