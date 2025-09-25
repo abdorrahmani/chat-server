@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Logs
+logs/
+*.log
+
+# Certificates (will be copied with the build)
+# tls/
+
+# Scripts
+generate-certs.sh
+generate-certs.bat
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  chat-server:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config.yml:/root/config.yml
+      - ./tls:/root/tls
+    environment:
+      - GO_ENV=production
+    restart: unless-stopped
+    networks:
+      - chat-network
+
+networks:
+  chat-network:
+    driver: bridge
