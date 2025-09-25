@@ -7,10 +7,10 @@
  [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](https://github.com/abdorrahmani/chat-server)
  [![Release](https://img.shields.io/github/v/release/abdorrahmani/chat-server?include_prereleases&sort=semver)](https://github.com/abdorrahmani/chat-server/releases)
 
-Lightweight chat server supporting TCP and WebSocket transports, with optional TLS for both (TLS over TCP and WSS). Includes configurable rate limiting, message size limits, optional password gate, and Docker/Compose deployment.
+Lightweight chat server supporting TCP, gRPC and WebSocket transports, with optional TLS for both (TLS over TCP, gRPC and WSS). Includes configurable rate limiting, message size limits, optional password gate, and Docker/Compose deployment.
 
 ### Features
-- TCP and WebSocket transports
+- TCP, gRPC and WebSocket transports
 - Optional TLS for both transports (TLS1.2+)
 - Simple chat with broadcast and private messages
 - Rate limiting per client and message length limit
@@ -23,9 +23,9 @@ Lightweight chat server supporting TCP and WebSocket transports, with optional T
 - Setup
 - Configuration
 - Generate TLS certificates
-- Run (TCP / WebSocket)
+- Run (TCP / WebSocket / gRPC)
 - Use the server (commands & examples)
-- TLS usage (TCP + WSS)
+- TLS usage (TCP + WSS + gRPC)
 - Docker and Docker Compose
  - gRPC mode
 - Logs and files
@@ -66,7 +66,7 @@ All settings live in `config.yml` and are loaded via Viper at startup.
 server:
   host: "0.0.0.0"   # (currently informational; the server binds to :port)
   port: 8080         # listening port for both TCP and WebSocket
-  type: "tcp"        # "tcp" or "websocket"
+  type: "tcp"        # "tcp" or "websocket" or gRPC
   maxClients: 100
   readTimeout: 5     # seconds (not all timeouts may be enforced in handlers)
   writeTimeout: 5    # seconds
@@ -90,15 +90,15 @@ log:
   file: "chat.log"
 
 tls:
-  tlsRequire: false          # enable TLS for TCP or WebSocket
+  tlsRequire: false          # enable TLS for TCP or WebSocket or gRPC
   certFile: "tls/server.crt"
   keyFile: "tls/server.key"
   minVersion: "TLS12"        # TLS12 or TLS13
 ```
 
-Key notes:
-- Set `server.type` to `tcp` for raw TCP, or `websocket` for WS/WSS.
-- Set `tls.tlsRequire: true` to enable TLS (affects both TCP and WebSocket depending on `server.type`).
+keynotes:
+- Set `server.type` to `tcp` for raw TCP, or `websocket` for WS/WSS, or `gRPC` for RPC .
+- Set `tls.tlsRequire: true` to enable TLS (affects both TCP, gRPC and WebSocket depending on `server.type`).
 - Files referenced in `tls` must exist and be readable by the process.
 
 ---
@@ -164,6 +164,22 @@ sed -i.bak 's/tlsRequire: .*/tlsRequire: true/' config.yml
 ```
 Listens on `wss://localhost:<port>/ws`.
 
+### gRPC mode (plaintext)
+```bash
+sed -i.bak 's/type: ".*"/type: "gRPC"/' config.yml
+sed -i.bak 's/tlsRequire: .*/tlsRequire: false/' config.yml
+./bin/chat
+```
+Listens for gRPC on `localhost:<port>`.
+
+### gRPC mode (TLS)
+```bash
+sed -i.bak 's/type: ".*"/type: "gRPC"/' config.yml
+sed -i.bak 's/tlsRequire: .*/tlsRequire: true/' config.yml
+./bin/chat
+```
+Uses your `tls/server.crt` and `tls/server.key`.
+
 ---
 
 ## Use the server
@@ -206,6 +222,23 @@ Commands and behavior:
   npx wscat@latest -c wss://localhost:8080/ws --no-check
   ```
 
+#### gRPC
+- Unary (SendMessage) without TLS:
+  ```bash
+  grpcurl -plaintext localhost:8080 chat.ChatService.SendMessage \
+    -d '{"user":"alice","text":"hello from grpc"}'
+  ```
+
+- Unary (SendMessage) with TLS (self-signed for dev):
+  ```bash
+  grpcurl -insecure localhost:8080 chat.ChatService.SendMessage \
+    -d '{"user":"alice","text":"secure hello"}'
+  ```
+
+- Streaming (Chat) tip:
+  - Use a small Go client for bidirectional streaming; interactive streaming via grpcurl/Postman is limited.
+  - On connect, first send a Join payload with username (and password if required), then send Text messages (supports `/pm <user> <msg>` and `/quit`).
+
 ---
 
 ## TLS usage details
@@ -214,6 +247,7 @@ The server enables TLS when `tls.tlsRequire: true`.
 
 - TCP + TLS: wraps the TCP listener with `crypto/tls` using `tls/server.crt` and `tls/server.key`.
 - WebSocket + TLS: uses `http.ListenAndServeTLS` to serve WSS at `/ws`.
+- gRPC + TLS: uses gRPC transport credentials from your `tls.server.crt`/`tls.server.key`.
 - Minimum TLS version is controlled by `tls.minVersion` (`TLS12` or `TLS13`).
 - For self-signed certs, clients must disable verification or trust the cert.
 
