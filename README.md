@@ -27,6 +27,7 @@ Lightweight chat server supporting TCP and WebSocket transports, with optional T
 - Use the server (commands & examples)
 - TLS usage (TCP + WSS)
 - Docker and Docker Compose
+ - gRPC mode
 - Logs and files
 - Troubleshooting
 
@@ -256,6 +257,40 @@ docker compose up --build
 ```
 
 Edit `config.yml` to switch between `tcp`/`websocket` and to enable/disable TLS. Recreate the container after changes.
+
+---
+
+## gRPC mode
+
+Set in `config.yml`:
+```yaml
+server:
+  type: "gRPC"
+  port: 8080
+tls:
+  tlsRequire: false # or true with certs
+```
+
+Server behavior:
+- Exposes unary RPC `chat.ChatService/SendMessage` with request `{ user, text }` and response `{ status }`.
+- Bridges to existing broadcast system: calling `SendMessage(user, text)` broadcasts to all other clients.
+
+Example call with grpcurl (no TLS):
+```bash
+grpcurl -plaintext localhost:8080 chat.ChatService.SendMessage \
+  -d '{"user":"alice","text":"hello from grpc"}'
+```
+
+TLS example (self-signed):
+```bash
+grpcurl -insecure -d '{"user":"alice","text":"secure hello"}' \
+  -authority localhost \
+  localhost:8080 chat.ChatService.SendMessage
+```
+
+Notes:
+- Current RPC is unary for simplicity; you can extend the proto to streaming later.
+- For production, replace self-signed certs with CA-issued certs and remove `-insecure`.
 
 ---
 

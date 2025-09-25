@@ -3,13 +3,16 @@ package main
 import (
 	"chat-server/internal/config"
 	"chat-server/internal/server"
+	grpcserver "chat-server/internal/server/grpcserver"
 	"chat-server/internal/server/network"
+	chatpb "chat-server/internal/server/network/grpc"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -73,6 +76,28 @@ func main() {
 			log.Printf("Websocket (WS) chat server listening on port %d\n", cfg.Server.Port)
 			log.Fatal(http.ListenAndServe(addr, nil))
 		}
+	} else if cfg.Server.Type == "gRPC" {
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Server.Port))
+		if err != nil {
+			fmt.Printf("Error listening on port %d : , Err:%v\n", cfg.Server.Port, err)
+			return
+		}
+
+		var opts []grpc.ServerOption
+		if cfg.TLS.TLSRequire {
+			creds, err := network.NewGRPCTLSCredentials(cfg.TLS)
+			if err != nil {
+				log.Fatalf("failed to create gRPC TLS creds: %v", err)
+			}
+			opts = append(opts, grpc.Creds(creds))
+		}
+
+		grpcSrv := grpc.NewServer(opts...)
+		grpcService := grpcserver.New(chatServer, cfg)
+		chatpb.RegisterChatServiceServer(grpcSrv, grpcService)
+
+		log.Printf("gRPC chat server listening on port %d (tls=%v)\n", cfg.Server.Port, cfg.TLS.TLSRequire)
+		log.Fatal(grpcSrv.Serve(listener))
 	} else {
 		log.Printf("Unknown type: %s\n", cfg.Server.Type)
 	}

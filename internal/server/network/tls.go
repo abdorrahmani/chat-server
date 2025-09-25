@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+
+	"google.golang.org/grpc/credentials"
 )
 
 func parseMinVersion(ver string) uint16 {
@@ -38,4 +40,13 @@ func NewTLS(ln net.Listener, tlsCfg config.TLSConfig) (net.Listener, error) {
 	}
 	tlsListener := tls.NewListener(ln, cfg)
 	return tlsListener, nil
+}
+
+// NewGRPCTLSCredentials builds gRPC transport credentials from TLS config
+func NewGRPCTLSCredentials(tlsCfg config.TLSConfig) (credentials.TransportCredentials, error) {
+	cfg, err := tlsConfig(tlsCfg)
+	if err != nil {
+		return nil, err
+	}
+	return credentials.NewTLS(cfg), nil
 }

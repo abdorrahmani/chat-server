@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package chat;
+
+option go_package = "/";
+
+service ChatService {
+  // Unary helper (kept for backward compatibility)
+  rpc SendMessage (ChatMessage) returns (ChatResponse);
+
+  // Bidirectional chat stream that mirrors TCP/WebSocket behavior
+  rpc Chat (stream ClientEvent) returns (stream ServerEvent);
+}
+
+// Existing unary types
+message ChatMessage {
+  string user = 1;
+  string text = 2;
+}
+
+message ChatResponse {
+  string status = 1;
+}
+
+// Streaming types
+message ClientEvent {
+  oneof payload {
+    Join join = 1;          // join with username and optional password
+    Text text = 2;          // broadcast text or commands (/pm, /quit)
+  }
+}
+
+message Join {
+  string username = 1;
+  string password = 2; // optional; required only if server asks
+}
+
+message Text {
+  string message = 1; // supports /pm <username> <message> and /quit
+}
+
+message ServerEvent {
+  oneof payload {
+    Prompt prompt = 1;      // e.g., "Enter your username:", "Enter password:"
+    Notice notice = 2;      // server system messages
+    Chat chat = 3;          // chat messages from others
+    Echo echo = 4;          // "ME: <message>"
+  }
+}
+
+message Prompt { string text = 1; }
+message Notice { string text = 1; }
+message Chat   { string from = 1; string text = 2; }
+message Echo   { string text = 1; }
